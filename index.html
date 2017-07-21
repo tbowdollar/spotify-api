@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+   <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
+  <title>Spotify API</title>
+  <style>
+  body {
+    padding: 0;
+    margin: 0;
+  }
+  * {
+    font-family: 'Open Sans', sans-serif;
+  }
+.hide {
+  display: none;
+}
+.wrapper {
+  width: 100%;
+  background-color: #222326;
+  height: 100vh;
+}
+.container {
+  width: 1200px;
+  max-width: 100%;
+  margin: 0 auto;
+  padding-top: 50px;
+}
+#login {
+  background-color: #1db954;
+  padding: 10px 40px;
+  color: #222326;
+  text-transform: uppercase;
+  text-decoration: none;
+}
+.content {
+  margin: 0 auto;
+  text-align: center;
+  color: #1db954;
+}
+.content img {
+  width: 500px;
+  height: 500px;
+}
+
+@media only screen and (max-width: 600px) {
+  .content img {
+    width: 100%;
+    height: auto;
+  }
+}
+  </style>
+</head>
+<body>
+<div class="wrapper">
+  <div class="container">
+    <div class="content">
+    <a href="javascript:;" id="login">Login</a>
+  </div>
+  </div>
+</div>
+
+<script>
+// html
+function renderHTML() {
+  var content_area = document.getElementsByClassName('content')[0];
+  var album_title = feed.item.album.name;
+  var artist = feed.item.artists[0].name;
+  var album_image = feed.item.album.images[0].url;
+  var track_name = feed.item.name;
+  btn.classList.add('hide');
+  var content = `<div class="current">
+    <img src="${album_image}" />
+    <p style="font-weight: bold;">
+${track_name}
+    </p>
+    <h1>${artist}</h1>
+    <p>
+      ${album_title}
+    </p>
+  </div>`;
+  content_area.innerHTML = content;
+
+}
+
+
+// Handels current playing track
+
+  var auth_token;
+  var auth_code;
+  var feed;
+  var json_obj;
+  var url = 'https://api.spotify.com/v1/me/player';
+  var request = new XMLHttpRequest;
+
+  function get_current_track() {
+  request.open('GET', url, true);
+  request.responseType = 'JSON';
+  request.setRequestHeader('Authorization', 'Bearer ' + auth_code);
+  request.overrideMimeType('application/json');
+  request.onreadystatechange = function() {
+    if (this.readyState == 4 && this.status == 200) {
+      get_feed(this);
+
+    }
+  };
+request.send(null);
+
+  function get_feed(request) {
+    json_obj = request.response;
+    feed = JSON.parse(json_obj);
+    console.log(json_obj);
+    renderHTML();
+  }
+}
+
+
+// Handles auth_token request
+var auth_url_base = 'https://accounts.spotify.com/authorize';
+var client_id = '3d2818c37f87435c845e3b92abcf9bda';
+var secret = 'd91c7c18e53847c4857920d2c2d94319';
+var redirect_uri = 'http://localhost:8000/callback.html';
+var response_type = 'token';
+var scope = 'user-read-playback-state';
+var auth_url = auth_url_base + '?client_id=' + client_id + '&response_type=' + response_type + '&redirect_uri=' + redirect_uri + '&scope=' + scope;
+var btn = document.getElementById('login');
+
+// Open login window
+var openLoginWindow = function() {
+  var win = window.open(auth_url, '_blank', "height=700, width=500");
+  win.focus();
+}
+
+btn.addEventListener('mousedown', openLoginWindow);
+
+// grabs auth_token
+window.addEventListener('message', function(e) {
+  auth_code = JSON.parse(e.data);
+   get_current_track();
+});
+</script>
+</body>
+</html>

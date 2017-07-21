@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Auth</title>
+</head>
+<body onload="init()">
+  <script>
+  function init() {
+    function getParameterByName(name, url) {
+    if (!url) url = window.location.href;
+    name = name.replace(/[\[\]]/g, "\\$&");
+    var regex = new RegExp("[?&#]" + name + "(=([^&#]*)|&|#|$)"),
+        results = regex.exec(url);
+    if (!results) return null;
+    if (!results[2]) return '';
+    return decodeURIComponent(results[2].replace(/\+/g, " "));
+}
+
+  var code = getParameterByName('access_token');
+  if (code != '') {
+    console.log(code);
+
+    var code_obj = JSON.stringify(code);
+    // Store in local storage
+    var stored_code = localStorage.setItem('auth_token', code_obj);
+    // send to original window
+    window.opener.postMessage(code_obj, '*');
+    // Close window
+    window.close();
+    }
+  }
+  </script>
+</body>
+</html>
